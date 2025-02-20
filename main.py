@@ -18,6 +18,7 @@ class BinaryNumber:
 ## ensure that x, y are appropriately sized binary vectors for a
 ## divide and conquer approach.
 
+
 def binary2int(binary_vec): 
     if len(binary_vec) == 0:
         return BinaryNumber(0)
@@ -50,16 +51,36 @@ def quadratic_multiply(x, y):
 
 def _quadratic_multiply(x, y):
     ### TODO
-    pass
+    #use pad to make x and y the same length
+    xvec, yvec = pad(x.binary_vec, y.binary_vec)
+    #Base Case: if length is one bit return the product of the two numbers
+    if x.decimal_val <= 1 and y.decimal_val <=1:
+        return BinaryNumber(x.decimal_val * y.decimal_val)
+    #split the numbers into halves
+    x_left, x_right = split_number(xvec)
+    y_left, y_right = split_number(yvec)
+
+    #recursively multiply the halves
+    left_product = _quadratic_multiply(x_left, y_left)
+    right_product = _quadratic_multiply(x_right, y_right)
+    other_product = _quadratic_multiply(BinaryNumber(x_left.decimal_val + x_right.decimal_val),BinaryNumber(y_left.decimal_val + y_right.decimal_val)) # part of divide and conque multiplication formula
+    #shifting the products
+    result = bit_shift(left_product, len(xvec))
+    result = BinaryNumber(result.decimal_val + bit_shift(BinaryNumber(other_product.decimal_val - left_product.decimal_val - right_product.decimal_val), len(xvec)//2).decimal_val)
+    result = BinaryNumber(result.decimal_val + right_product.decimal_val) # add X_right * Y_right
+    return result
+        
+    
     ###
 
 
     
     
-def test_quadratic_multiply(x, y, f):
+def quadratic_multiply_test(x, y, f):
     start = time.time()
     # multiply two numbers x, y using function f
-    
+    result = f(BinaryNumber(x), BinaryNumber(y))
+    assert(result == x*y)
     return (time.time() - start)*1000
 
 
